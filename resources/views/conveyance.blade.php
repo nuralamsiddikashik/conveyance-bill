@@ -196,10 +196,16 @@
 
       #pdf-area {
         background: #fff;
-        padding: 30px 36px;
+        padding: 36px 40px;
         max-width: 900px;
         margin: 0 auto;
         border-radius: 4px;
+      }
+
+      /* Print page size and margins */
+      @page {
+        size: A4;
+        margin: 2mm 4mm 4mm 4mm; /* top, right, bottom, left */
       }
 
       .preview-table {
@@ -209,17 +215,28 @@
       }
       .preview-table th {
         border: 1px solid #1a1a2e;
-        padding: 8px;
+        padding: 12px 14px;
         background: #1a1a2e;
         color: #fff;
         font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
       }
       .preview-table td {
         border: 1px solid #666;
-        padding: 8px;
-        font-size: 13px;
-        text-align: center;
+        padding: 10px 12px;
+        font-size: 12px;
+        text-align: left;
       }
+      .preview-table td.tr {
+        text-align: right;
+      }
+      .preview-table thead th { text-align: center; }
+
+      /* Totals row styling */
+      .preview-table tfoot tr { background: #f3f4f7; font-weight: 700; }
+      .preview-table tfoot td { padding: 10px 12px; }
+      #prev-total-cell { text-align: right; font-weight: 800; }
       .preview-table .tl {
         text-align: left;
       }
@@ -230,7 +247,7 @@
       .sig-row {
         display: flex;
         justify-content: space-between;
-        margin-top: 50px;
+        margin-top: 60px;
         gap: 15px;
       }
       .sig-item {
@@ -238,13 +255,16 @@
         text-align: center;
       }
       .sig-line {
+        width: 190px;
+        margin: 0 auto 8px;
         border-top: 1.5px solid #222;
-        margin-bottom: 5px;
+        height: 1px;
       }
       .sig-label {
         font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
+        letter-spacing: 0.6px;
       }
 
       .pdf-compact #pdf-area {
@@ -285,13 +305,32 @@
       }
 
       @media print {
+        html, body {
+          background: #fff !important;
+          margin: 2mm !important;
+          color: #111 !important;
+        }
         .no-print {
           display: none !important;
         }
         #pdf-area {
           box-shadow: none;
-          padding: 0;
+          padding: 2mm 3mm 3mm 3mm;
+          max-width: 100% !important;
+          margin: 0 !important;
+          border-radius: 0;
         }
+        /* Tighter table and signature spacing for print */
+        .preview-table th { padding: 6px 8px; font-size: 12px; }
+        .preview-table td { padding: 6px 8px; font-size: 11px; }
+        .preview-table td.tr { text-align: right; }
+        .sig-line { width: 140px; }
+        .preview-table th, .preview-table td {
+          -webkit-print-color-adjust: exact;
+        }
+        .preview-table tr { page-break-inside: avoid; }
+        .preview-table { page-break-inside: auto; }
+        .sig-row { margin-top: 80px; }
       }
     </style>
   </head>
@@ -418,7 +457,7 @@
       @endif
 
       <div id="pdf-area">
-        <div id="header-container" style="margin-bottom: 10px">
+        <div id="header-container" style="margin-bottom: 6px">
           <div
             style="
               font-family: &quot;Merriweather&quot;, serif;
@@ -539,9 +578,12 @@
       </div>
 
       <div style="margin-top: 20px" class="no-print">
-        <button class="btn-pdf" onclick="downloadPDF()" id="dlBtn">
-          Download PDF
-        </button>
+        <div style="display:flex; gap:8px;">
+          <button id="printBtn" class="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-semibold" onclick="printThis()">Print</button>
+          <button class="btn-pdf" onclick="downloadPDF()" id="dlBtn">
+            Download PDF
+          </button>
+        </div>
       </div>
     </div>
 
@@ -696,6 +738,19 @@
           });
       }
 
+      function printThis() {
+        const btn = document.getElementById('printBtn');
+        btn.disabled = true;
+        document.body.classList.add('pdf-compact');
+        function cleanup() {
+          document.body.classList.remove('pdf-compact');
+          btn.disabled = false;
+          window.removeEventListener('afterprint', cleanup);
+        }
+        window.addEventListener('afterprint', cleanup);
+        window.print();
+      }
+
       function numberToWords(num) {
         if (num === 0) return "Zero";
         const ones = [
@@ -801,6 +856,7 @@
         renderAll();
       })();
     </script>
+ 
   </body>
 </html>
 

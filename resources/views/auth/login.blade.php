@@ -12,12 +12,7 @@
         Login
       </h1>
 
-      <div class="mb-3 rounded border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
-        Default login:
-        <span class="font-semibold">admin@conveyance.local</span>
-        /
-        <span class="font-semibold">1234567</span>
-      </div>
+ 
 
       @if ($errors->any())
         <div class="mb-3 rounded border border-red-500 bg-red-50 px-3 py-2 text-sm text-red-800">
