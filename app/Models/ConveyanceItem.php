@@ -5,8 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ConveyanceItem extends Model
-{
+class ConveyanceItem extends Model {
     use HasFactory;
 
     protected $fillable = [
@@ -17,9 +16,7 @@ class ConveyanceItem extends Model
         'remarks',
     ];
 
-    public function conveyance()
-    {
-        return $this->belongsTo(Conveyance::class);
+    public function conveyance() {
+        return $this->belongsTo( Conveyance::class );
     }
 }
-

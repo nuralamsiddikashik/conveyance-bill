@@ -4,27 +4,23 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::table('conveyances', function (Blueprint $table) {
+    public function up(): void {
+        Schema::table( 'conveyances', function ( Blueprint $table ) {
             // Allow multiple conveyances per date (drop index created by ->unique())
-            $table->dropUnique('conveyances_date_unique');
-        });
+            $table->dropUnique( 'conveyances_date_unique' );
+        } );
     }
 
     /**
      * Reverse the migrations.
      */
-    public function down(): void
-    {
-        Schema::table('conveyances', function (Blueprint $table) {
-            $table->unique('date');
-        });
+    public function down(): void {
+        Schema::table( 'conveyances', function ( Blueprint $table ) {
+            $table->unique( 'date' );
+        } );
     }
 };
-
