@@ -32,6 +32,22 @@
         </div>
       </div>
 
+      @if (session('status'))
+        <div class="mb-4 rounded border border-green-500 bg-green-50 px-3 py-2 text-sm text-green-800">
+          {{ session('status') }}
+        </div>
+      @endif
+
+      @if ($errors->any())
+        <div class="mb-4 rounded border border-red-500 bg-red-50 px-3 py-2 text-sm text-red-800">
+          <ul class="list-disc pl-4">
+            @foreach ($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
+
       @if ($conveyances->isEmpty())
         <div class="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-600">
           No conveyance records yet. Create today&apos;s conveyance from the entry page.

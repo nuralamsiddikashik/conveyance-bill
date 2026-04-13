@@ -14,6 +14,12 @@
           <p class="mt-1 text-sm text-slate-500">Approve new registrations before they can access the system.</p>
         </div>
         <div class="flex items-center gap-3">
+          <div class="hidden sm:flex items-center gap-2">
+            <a href="{{ route('admin.users.index') }}" class="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">Users</a>
+            <a href="{{ route('admin.activity.index') }}" class="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">Activity</a>
+            <a href="{{ route('admin.deletions.index') }}" class="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">Deletions</a>
+            <a href="{{ route('admin.login-requests.index') }}" class="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">Login Requests</a>
+          </div>
           <a href="{{ route('conveyances.index') }}" class="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">Back to History</a>
           <form method="POST" action="{{ route('logout') }}">
             @csrf
@@ -61,17 +67,19 @@
                   </span>
                 </td>
                 <td class="px-4 py-3">
-                  @if ($user->isApproved())
-                    <span class="inline-flex rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700">Approved</span>
+                  @if ($user->is_admin)
+                    <span class="inline-flex rounded-full bg-indigo-100 px-2 py-1 text-xs font-semibold text-indigo-700">Admin</span>
+                  @elseif ($user->approved_at === null)
+                    <span class="inline-flex rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700">Pending Approval</span>
                   @else
-                    <span class="inline-flex rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700">Pending</span>
+                    <span class="inline-flex rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700">Approved</span>
                   @endif
                 </td>
                 <td class="px-4 py-3 text-slate-600">
                   {{ $user->created_at?->format('d M, Y') }}
                 </td>
                 <td class="px-4 py-3 text-right">
-                  @if (! $user->isApproved())
+                  @if (! $user->is_admin && $user->approved_at === null)
                     <form method="POST" action="{{ route('admin.users.approve', $user) }}">
                       @csrf
                       <button type="submit" class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-1 text-xs font-semibold text-white hover:bg-indigo-700">Approve</button>

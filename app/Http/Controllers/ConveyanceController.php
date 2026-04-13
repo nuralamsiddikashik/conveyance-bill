@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreConveyanceRequest;
 use App\Models\Conveyance;
+use App\Models\ConveyanceDeleteRequest;
 use App\Models\ConveyanceItem;
 use App\Repositories\ConveyanceRepositoryInterface;
 
@@ -157,11 +158,39 @@ class ConveyanceController extends Controller {
      */
     public function destroy( Conveyance $conveyance ) {
         $this->ensureAuthorized( $conveyance );
-        $this->repo->delete( $conveyance );
+        $user = auth()->user();
+        if ( $user && $user->is_admin ) {
+            $this->repo->delete( $conveyance );
+
+            return redirect()
+                ->route( 'conveyances.index' )
+                ->with( 'status', 'Conveyance deleted successfully.' );
+        }
+
+        $existing = ConveyanceDeleteRequest::where( 'conveyance_id', $conveyance->id )
+            ->where( 'status', 'pending' )
+            ->first();
+
+        if ( $existing ) {
+            return redirect()
+                ->route( 'conveyances.index' )
+                ->with( 'status', 'Deletion request already submitted and pending admin approval.' );
+        }
+
+        ConveyanceDeleteRequest::create( [
+            'conveyance_id' => $conveyance->id,
+            'requested_by' => $user?->id,
+            'status' => 'pending',
+            'conveyance_date' => $conveyance->date,
+            'conveyance_total_amount' => $conveyance->total_amount,
+            'conveyance_owner_id' => $conveyance->user_id,
+            'request_ip' => request()->ip(),
+            'request_user_agent' => request()->userAgent(),
+        ] );
 
         return redirect()
             ->route( 'conveyances.index' )
-            ->with( 'status', 'Conveyance deleted successfully.' );
+            ->with( 'status', 'Deletion request sent to admin for approval.' );
     }
 
     private function ensureAuthorized( Conveyance $conveyance ): void {

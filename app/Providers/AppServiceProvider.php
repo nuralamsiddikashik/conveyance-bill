@@ -27,6 +27,10 @@ class AppServiceProvider extends ServiceProvider {
             return Limit::perMinute( 5 )->by( $email . $request->ip() );
         } );
 
+        RateLimiter::for( 'register', function ( Request $request ) {
+            return Limit::perMinute( 3 )->by( $request->ip() );
+        } );
+
         RateLimiter::for( 'conveyance-write', function ( Request $request ) {
             $key = $request->user()?->id ? (string) $request->user()->id : $request->ip();
 

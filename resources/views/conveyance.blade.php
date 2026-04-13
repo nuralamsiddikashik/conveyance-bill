@@ -462,7 +462,7 @@
               <form
                 method="POST"
                 action="{{ route('conveyances.destroy', $conveyance) }}"
-                onsubmit="return confirm('Are you sure you want to delete this conveyance?');"
+                onsubmit="return confirm('{{ auth()->user() && auth()->user()->is_admin ? 'Are you sure you want to delete this conveyance?' : 'Send deletion request to admin?' }}');"
               >
                 @csrf
                 @method('DELETE')
@@ -470,7 +470,7 @@
                   type="submit"
                   class="rounded border border-red-500 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-red-600 hover:bg-red-50"
                 >
-                  Delete This Conveyance
+                  {{ auth()->user() && auth()->user()->is_admin ? 'Delete This Conveyance' : 'Request Deletion' }}
                 </button>
               </form>
             </div>

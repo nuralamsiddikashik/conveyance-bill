@@ -47,6 +47,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_admin' => 'boolean',
             'approved_at' => 'datetime',
+            'last_login_approved_at' => 'datetime',
         ];
     }
 
@@ -54,7 +55,23 @@ class User extends Authenticatable
         return $this->hasMany( Conveyance::class );
     }
 
+    public function activityLogs() {
+        return $this->hasMany( UserActivityLog::class );
+    }
+
+    public function deleteRequests() {
+        return $this->hasMany( ConveyanceDeleteRequest::class, 'requested_by' );
+    }
+
+    public function loginRequests() {
+        return $this->hasMany( LoginRequest::class );
+    }
+
     public function isApproved(): bool {
-        return $this->is_admin || $this->approved_at !== null;
+        if ( $this->is_admin ) {
+            return true;
+        }
+
+        return $this->approved_at !== null;
     }
 }

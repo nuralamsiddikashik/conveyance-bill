@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder {
     use WithoutModelEvents;
@@ -16,9 +17,9 @@ class DatabaseSeeder extends Seeder {
         User::updateOrCreate(
             ['email' => 'admin@conveyance.local'],
             [
-                'name'     => 'Admin',
-                'password' => '1234567',
-                'is_admin' => true,
+                'name'        => 'Admin',
+                'password'    => Hash::make( '1234567' ),
+                'is_admin'    => true,
                 'approved_at' => now(),
             ]
         );

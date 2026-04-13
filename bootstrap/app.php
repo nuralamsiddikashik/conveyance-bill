@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias( [
             'approved' => \App\Http\Middleware\EnsureUserApproved::class,
             'admin'    => \App\Http\Middleware\EnsureAdmin::class,
+            'activity' => \App\Http\Middleware\LogUserActivity::class,
         ] );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
