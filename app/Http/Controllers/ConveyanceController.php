@@ -49,6 +49,50 @@ class ConveyanceController extends Controller {
     }
 
     /**
+     * Show the edit form for a conveyance.
+     */
+    public function edit( Conveyance $conveyance ) {
+        $conveyance->load( 'items' );
+
+        $rows = $conveyance->items->map( function ( ConveyanceItem $item ) {
+            return [
+                'from'    => $item->from_place,
+                'to'      => $item->to_place,
+                'amount'  => (float) $item->amount,
+                'remarks' => $item->remarks,
+            ];
+        } )->values()->all();
+
+        return view( 'conveyance', [
+            'mode'       => 'edit',
+            'conveyance' => $conveyance,
+            'rows'       => $rows,
+            'date'       => $conveyance->date->format( 'Y-m-d' ),
+        ] );
+    }
+
+    /**
+     * Update a conveyance and its items.
+     */
+    public function update( StoreConveyanceRequest $request, Conveyance $conveyance ) {
+        $validated = $request->validated();
+
+        $rows = $request->rows();
+
+        if ( empty( $rows ) ) {
+            return back()
+                ->withInput()
+                ->withErrors( ['rows' => 'Please add at least one conveyance row.'] );
+        }
+
+        $this->repo->update( $conveyance, $validated['date'], $rows );
+
+        return redirect()
+            ->route( 'conveyances.show', $conveyance )
+            ->with( 'status', 'Conveyance updated successfully.' );
+    }
+
+    /**
      * List conveyances grouped by date.
      */
     public function index() {

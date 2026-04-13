@@ -58,14 +58,15 @@
                     </div>
                     <div class="text-right">
                       <div class="text-xs text-slate-500">Items</div>
-                      <div class="mt-1 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{{ $conveyance->items->count() }}</div>
+                      <div class="mt-1 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{{ $conveyance->items_count ?? $conveyance->items->count() }}</div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div class="mt-4 flex items-center justify-between gap-3">
+              <div class="mt-4 flex flex-wrap items-center gap-2">
                 <a href="{{ route('conveyances.show', $conveyance) }}" class="inline-flex items-center gap-2 rounded-md border border-indigo-100 bg-white px-3 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50">View</a>
+                <a href="{{ route('conveyances.edit', $conveyance) }}" class="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">Edit</a>
                 <a href="{{ route('conveyances.show', $conveyance) }}" class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-1 text-xs font-medium text-white hover:bg-indigo-700">PDF</a>
               </div>
             </article>
@@ -75,4 +76,3 @@
     </div>
   </body>
 </html>
-

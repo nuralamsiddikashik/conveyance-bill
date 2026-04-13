@@ -353,24 +353,38 @@
         @endif
       </div>
 
-      @if ($mode === 'create')
+      @if ($mode === 'create' || $mode === 'edit')
         <div class="panel no-print">
           <div class="flex items-center justify-between gap-3">
-            <h2 class="panel-title mb-0 border-b-0 pb-0">Conveyance Entry</h2>
-            <a
-              href="{{ route('conveyances.index') }}"
-              class="text-xs font-semibold uppercase tracking-wide text-blue-700 underline"
-            >
-              View Previous Dates
-            </a>
+            <h2 class="panel-title mb-0 border-b-0 pb-0">
+              {{ $mode === 'edit' ? 'Edit Conveyance' : 'Conveyance Entry' }}
+            </h2>
+            @if ($mode === 'edit' && isset($conveyance))
+              <a
+                href="{{ route('conveyances.show', $conveyance) }}"
+                class="text-xs font-semibold uppercase tracking-wide text-blue-700 underline"
+              >
+                Back to View
+              </a>
+            @else
+              <a
+                href="{{ route('conveyances.index') }}"
+                class="text-xs font-semibold uppercase tracking-wide text-blue-700 underline"
+              >
+                View Previous Dates
+              </a>
+            @endif
           </div>
 
           <form
             id="conveyanceForm"
             method="POST"
-            action="{{ route('conveyances.store') }}"
+            action="{{ $mode === 'edit' && isset($conveyance) ? route('conveyances.update', $conveyance) : route('conveyances.store') }}"
           >
             @csrf
+            @if ($mode === 'edit')
+              @method('PUT')
+            @endif
             <div style="width: min(220px, 100%); margin: 14px 0 18px">
               <label class="field-label">Date</label>
               <input
@@ -421,7 +435,7 @@
                 type="submit"
                 class="rounded bg-emerald-600 px-4 py-2 text-sm font-semibold uppercase tracking-wide text-white shadow hover:bg-emerald-700"
               >
-                Save Conveyance
+                {{ $mode === 'edit' ? 'Update Conveyance' : 'Save Conveyance' }}
               </button>
             </div>
           </form>
@@ -438,20 +452,28 @@
           </a>
 
           @if(isset($conveyance))
-            <form
-              method="POST"
-              action="{{ route('conveyances.destroy', $conveyance) }}"
-              onsubmit="return confirm('Are you sure you want to delete this conveyance?');"
-            >
-              @csrf
-              @method('DELETE')
-              <button
-                type="submit"
-                class="rounded border border-red-500 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-red-600 hover:bg-red-50"
+            <div class="flex items-center gap-2">
+              <a
+                href="{{ route('conveyances.edit', $conveyance) }}"
+                class="rounded border border-slate-300 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-700 hover:bg-slate-50"
               >
-                Delete This Conveyance
-              </button>
-            </form>
+                Edit
+              </a>
+              <form
+                method="POST"
+                action="{{ route('conveyances.destroy', $conveyance) }}"
+                onsubmit="return confirm('Are you sure you want to delete this conveyance?');"
+              >
+                @csrf
+                @method('DELETE')
+                <button
+                  type="submit"
+                  class="rounded border border-red-500 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-red-600 hover:bg-red-50"
+                >
+                  Delete This Conveyance
+                </button>
+              </form>
+            </div>
           @endif
         </div>
       @endif
@@ -599,6 +621,15 @@
         ? window.initialRows
         : [];
 
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
       function addRow() {
         const id = Date.now() + Math.random();
         rows.push({ id, from: "", to: "", amount: "", remarks: "" });
@@ -629,18 +660,22 @@
         if (!tbody) return;
 
         tbody.innerHTML = rows
-          .map(
-            (row, idx) => `
+          .map((row, idx) => {
+            const fromVal = escapeHtml(row.from);
+            const toVal = escapeHtml(row.to);
+            const amountVal = escapeHtml(row.amount);
+            const remarksVal = escapeHtml(row.remarks);
+            return `
           <tr>
             <td style="text-align:center;">${idx + 1}</td>
-            <td><input value="${row.from}" oninput="setField(${row.id},'from',this.value)"/></td>
-            <td><input value="${row.to}" oninput="setField(${row.id},'to',this.value)"/></td>
-            <td><input type="number" value="${row.amount}" style="text-align:right;" oninput="setField(${row.id},'amount',this.value)"/></td>
-            <td><input value="${row.remarks}" oninput="setField(${row.id},'remarks',this.value)"/></td>
+            <td><input value="${fromVal}" oninput="setField(${row.id},'from',this.value)"/></td>
+            <td><input value="${toVal}" oninput="setField(${row.id},'to',this.value)"/></td>
+            <td><input type="number" value="${amountVal}" style="text-align:right;" oninput="setField(${row.id},'amount',this.value)"/></td>
+            <td><input value="${remarksVal}" oninput="setField(${row.id},'remarks',this.value)"/></td>
             <td><button class="btn-remove" onclick="removeRow(${row.id})">✕</button></td>
           </tr>
-        `,
-          )
+        `;
+          })
           .join("");
       }
 
@@ -649,22 +684,26 @@
         if (!mc) return;
 
         mc.innerHTML = rows
-          .map(
-            (row, idx) => `
+          .map((row, idx) => {
+            const fromVal = escapeHtml(row.from);
+            const toVal = escapeHtml(row.to);
+            const amountVal = escapeHtml(row.amount);
+            const remarksVal = escapeHtml(row.remarks);
+            return `
           <div class="mobile-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
               <strong style="font-size:14px;">Entry ${idx + 1}</strong>
               <button class="btn-remove" onclick="removeRow(${row.id})">✕</button>
             </div>
             <div class="mobile-grid">
-              <input placeholder="From" value="${row.from}" oninput="setField(${row.id},'from',this.value)"/>
-              <input placeholder="To" value="${row.to}" oninput="setField(${row.id},'to',this.value)"/>
-              <input placeholder="Amount" type="number" value="${row.amount}" oninput="setField(${row.id},'amount',this.value)"/>
-              <input placeholder="Remarks" value="${row.remarks}" oninput="setField(${row.id},'remarks',this.value)"/>
+              <input placeholder="From" value="${fromVal}" oninput="setField(${row.id},'from',this.value)"/>
+              <input placeholder="To" value="${toVal}" oninput="setField(${row.id},'to',this.value)"/>
+              <input placeholder="Amount" type="number" value="${amountVal}" oninput="setField(${row.id},'amount',this.value)"/>
+              <input placeholder="Remarks" value="${remarksVal}" oninput="setField(${row.id},'remarks',this.value)"/>
             </div>
           </div>
-        `,
-          )
+        `;
+          })
           .join("");
       }
 
@@ -688,13 +727,16 @@
           .map((row, idx) => {
             const amt = parseFloat(row.amount) || 0;
             total += amt;
+            const fromVal = escapeHtml(row.from);
+            const toVal = escapeHtml(row.to);
+            const remarksVal = escapeHtml(row.remarks);
             return `
             <tr>
               <td>${idx + 1}</td>
-              <td class="tl">${row.from}</td>
-              <td class="tl">${row.to}</td>
+              <td class="tl">${fromVal}</td>
+              <td class="tl">${toVal}</td>
               <td class="tr">${amt.toFixed(2)}</td>
-              <td class="tl">${row.remarks}</td>
+              <td class="tl">${remarksVal}</td>
             </tr>
           `;
           })
@@ -835,7 +877,7 @@
         }
 
         const form = document.getElementById("conveyanceForm");
-        if (form && mode === "create") {
+        if (form && (mode === "create" || mode === "edit")) {
           form.addEventListener("submit", function (e) {
             if (!rows.length) {
               e.preventDefault();
@@ -859,4 +901,3 @@
  
   </body>
 </html>
-

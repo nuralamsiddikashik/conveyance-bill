@@ -31,8 +31,37 @@ class EloquentConveyanceRepository implements ConveyanceRepositoryInterface {
         return $conveyance;
     }
 
+    public function update( Conveyance $conveyance, string $date, array $rows ): Conveyance {
+        $total = 0;
+        foreach ( $rows as $row ) {
+            $total += (float) ( $row['amount'] ?? 0 );
+        }
+
+        DB::transaction( function () use ( $conveyance, $date, $rows, $total ) {
+            $conveyance->update( [
+                'date'         => $date,
+                'total_amount' => $total,
+            ] );
+
+            $conveyance->items()->delete();
+
+            foreach ( $rows as $row ) {
+                $conveyance->items()->create( [
+                    'from_place' => $row['from'] ?? null,
+                    'to_place'   => $row['to'] ?? null,
+                    'amount'     => (float) ( $row['amount'] ?? 0 ),
+                    'remarks'    => $row['remarks'] ?? null,
+                ] );
+            }
+        } );
+
+        return $conveyance->fresh( 'items' );
+    }
+
     public function all() {
-        return Conveyance::orderByDesc( 'date' )->get();
+        return Conveyance::withCount( 'items' )
+            ->orderByDesc( 'date' )
+            ->get();
     }
 
     public function findByDate( string $date ): ?Conveyance {
