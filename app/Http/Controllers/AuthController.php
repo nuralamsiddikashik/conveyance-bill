@@ -28,6 +28,17 @@ class AuthController extends Controller {
         if ( Auth::attempt( $credentials, $remember ) ) {
             $request->session()->regenerate();
 
+            $user = $request->user();
+            if ( $user && ! $user->isApproved() ) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()
+                    ->withInput()
+                    ->withErrors( ['email' => 'Your account is pending admin approval.'] );
+            }
+
             return redirect()->intended( route( 'conveyances.create' ) );
         }
 
@@ -53,14 +64,11 @@ class AuthController extends Controller {
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ] );
 
-        /** @var \App\Models\User $user */
-        $user = User::create( $data );
+        User::create( $data );
 
-        Auth::login( $user );
-
-        $request->session()->regenerate();
-
-        return redirect()->intended( route( 'conveyances.create' ) );
+        return redirect()
+            ->route( 'login' )
+            ->with( 'status', 'Registration submitted. Please wait for admin approval.' );
     }
 
     /**

@@ -9,6 +9,7 @@ class Conveyance extends Model {
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'date',
         'total_amount',
     ];
@@ -19,5 +20,9 @@ class Conveyance extends Model {
 
     public function items() {
         return $this->hasMany( ConveyanceItem::class );
+    }
+
+    public function user() {
+        return $this->belongsTo( User::class );
     }
 }

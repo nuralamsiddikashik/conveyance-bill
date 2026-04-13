@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_admin',
+        'approved_at',
     ];
 
     /**
@@ -43,6 +45,16 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
+            'approved_at' => 'datetime',
         ];
+    }
+
+    public function conveyances() {
+        return $this->hasMany( Conveyance::class );
+    }
+
+    public function isApproved(): bool {
+        return $this->is_admin || $this->approved_at !== null;
     }
 }

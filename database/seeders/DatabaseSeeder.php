@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder {
             [
                 'name'     => 'Admin',
                 'password' => '1234567',
+                'is_admin' => true,
+                'approved_at' => now(),
             ]
         );
     }

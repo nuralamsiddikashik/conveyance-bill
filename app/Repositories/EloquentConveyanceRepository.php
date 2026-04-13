@@ -3,17 +3,19 @@
 namespace App\Repositories;
 
 use App\Models\Conveyance;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class EloquentConveyanceRepository implements ConveyanceRepositoryInterface {
-    public function createForDate( string $date, array $rows ): Conveyance {
+    public function createForDate( User $user, string $date, array $rows ): Conveyance {
         $total = 0;
         foreach ( $rows as $row ) {
             $total += (float) ( $row['amount'] ?? 0 );
         }
 
-        DB::transaction( function () use ( $date, $rows, $total, &$conveyance ) {
+        DB::transaction( function () use ( $user, $date, $rows, $total, &$conveyance ) {
             $conveyance = Conveyance::create( [
+                'user_id'      => $user->id,
                 'date'         => $date,
                 'total_amount' => $total,
             ] );
@@ -58,17 +60,33 @@ class EloquentConveyanceRepository implements ConveyanceRepositoryInterface {
         return $conveyance->fresh( 'items' );
     }
 
-    public function all() {
-        return Conveyance::withCount( 'items' )
+    public function all( User $user ) {
+        return $this->queryForUser( $user )
+            ->with( 'user' )
+            ->withCount( 'items' )
             ->orderByDesc( 'date' )
             ->get();
     }
 
-    public function findByDate( string $date ): ?Conveyance {
-        return Conveyance::with( 'items' )->where( 'date', $date )->first();
+    public function findByDate( User $user, string $date ): ?Conveyance {
+        return $this->queryForUser( $user )
+            ->with( ['items', 'user'] )
+            ->where( 'date', $date )
+            ->orderByDesc( 'created_at' )
+            ->first();
     }
 
     public function delete( Conveyance $conveyance ): void {
         $conveyance->delete();
+    }
+
+    private function queryForUser( User $user ) {
+        $query = Conveyance::query();
+
+        if ( ! $user->is_admin ) {
+            $query->where( 'user_id', $user->id );
+        }
+
+        return $query;
     }
 }

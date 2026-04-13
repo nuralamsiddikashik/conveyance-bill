@@ -11,6 +11,9 @@
       <h1 class="text-xl font-semibold text-slate-900 mb-4">
         Register
       </h1>
+      <p class="mb-4 text-xs text-slate-500">
+        New registrations need admin approval before you can log in.
+      </p>
 
       @if ($errors->any())
         <div class="mb-3 rounded border border-red-500 bg-red-50 px-3 py-2 text-sm text-red-800">
@@ -90,4 +93,3 @@
     </div>
   </body>
 </html>
-

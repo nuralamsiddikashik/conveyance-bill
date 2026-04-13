@@ -20,6 +20,9 @@
           @auth
             <div class="flex items-center gap-2">
               <span class="hidden sm:inline-block text-sm text-slate-700">{{ auth()->user()->name }}</span>
+              @if (auth()->user()->is_admin)
+                <a href="{{ route('admin.users.index') }}" class="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50">Admin</a>
+              @endif
               <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="ml-1 inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50">Logout</button>
@@ -61,6 +64,11 @@
                       <div class="mt-1 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{{ $conveyance->items_count ?? $conveyance->items->count() }}</div>
                     </div>
                   </div>
+                  @if (auth()->user()->is_admin)
+                    <div class="mt-3 text-xs text-slate-500">
+                      Owner: <span class="font-semibold text-slate-700">{{ $conveyance->user?->name ?? 'Unknown' }}</span>
+                    </div>
+                  @endif
                 </div>
               </div>
 

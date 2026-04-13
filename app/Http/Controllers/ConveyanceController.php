@@ -41,7 +41,7 @@ class ConveyanceController extends Controller {
                 ->withErrors( ['rows' => 'Please add at least one conveyance row.'] );
         }
 
-        $this->repo->createForDate( $validated['date'], $rows );
+        $this->repo->createForDate( $request->user(), $validated['date'], $rows );
 
         return redirect()
             ->route( 'conveyances.create' )
@@ -52,6 +52,7 @@ class ConveyanceController extends Controller {
      * Show the edit form for a conveyance.
      */
     public function edit( Conveyance $conveyance ) {
+        $this->ensureAuthorized( $conveyance );
         $conveyance->load( 'items' );
 
         $rows = $conveyance->items->map( function ( ConveyanceItem $item ) {
@@ -75,6 +76,7 @@ class ConveyanceController extends Controller {
      * Update a conveyance and its items.
      */
     public function update( StoreConveyanceRequest $request, Conveyance $conveyance ) {
+        $this->ensureAuthorized( $conveyance );
         $validated = $request->validated();
 
         $rows = $request->rows();
@@ -96,7 +98,7 @@ class ConveyanceController extends Controller {
      * List conveyances grouped by date.
      */
     public function index() {
-        $conveyances = $this->repo->all();
+        $conveyances = $this->repo->all( auth()->user() );
 
         return view( 'conveyance_index', [
             'conveyances' => $conveyances,
@@ -107,7 +109,7 @@ class ConveyanceController extends Controller {
      * Show a specific conveyance by its date.
      */
     public function showByDate( string $date ) {
-        $conveyance = $this->repo->findByDate( $date ) ?? abort( 404 );
+        $conveyance = $this->repo->findByDate( auth()->user(), $date ) ?? abort( 404 );
 
         $rows = $conveyance->items->map( function ( ConveyanceItem $item ) {
             return [
@@ -130,6 +132,7 @@ class ConveyanceController extends Controller {
      * Show a specific conveyance by id.
      */
     public function show( Conveyance $conveyance ) {
+        $this->ensureAuthorized( $conveyance );
         $conveyance->load( 'items' );
 
         $rows = $conveyance->items->map( function ( ConveyanceItem $item ) {
@@ -153,10 +156,25 @@ class ConveyanceController extends Controller {
      * Delete a conveyance and its items.
      */
     public function destroy( Conveyance $conveyance ) {
+        $this->ensureAuthorized( $conveyance );
         $this->repo->delete( $conveyance );
 
         return redirect()
             ->route( 'conveyances.index' )
             ->with( 'status', 'Conveyance deleted successfully.' );
+    }
+
+    private function ensureAuthorized( Conveyance $conveyance ): void {
+        $user = auth()->user();
+
+        if ( ! $user ) {
+            abort( 403 );
+        }
+
+        if ( $user->is_admin || $conveyance->user_id === $user->id ) {
+            return;
+        }
+
+        abort( 403 );
     }
 }

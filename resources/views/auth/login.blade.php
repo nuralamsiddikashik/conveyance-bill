@@ -12,7 +12,11 @@
         Login
       </h1>
 
- 
+      @if (session('status'))
+        <div class="mb-3 rounded border border-green-500 bg-green-50 px-3 py-2 text-sm text-green-800">
+          {{ session('status') }}
+        </div>
+      @endif
 
       @if ($errors->any())
         <div class="mb-3 rounded border border-red-500 bg-red-50 px-3 py-2 text-sm text-red-800">
@@ -58,6 +62,12 @@
             />
             <span class="text-slate-700">Remember me</span>
           </label>
+          <a
+            href="{{ route('register.show') }}"
+            class="text-indigo-600 hover:text-indigo-800 font-semibold"
+          >
+            Register
+          </a>
         </div>
 
         <button
@@ -70,4 +80,3 @@
     </div>
   </body>
 </html>
-

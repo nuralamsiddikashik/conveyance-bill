@@ -11,11 +11,19 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])
 Route::post('/login', [AuthController::class, 'login'])
     ->middleware(['guest', 'throttle:login']);
 
+Route::get('/register', [AuthController::class, 'showRegisterForm'])
+    ->middleware('guest')
+    ->name('register.show');
+
+Route::post('/register', [AuthController::class, 'register'])
+    ->middleware('guest')
+    ->name('register');
+
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'approved'])->group(function () {
     Route::get('/', [ConveyanceController::class, 'create'])
         ->name('conveyances.create');
 
@@ -44,3 +52,13 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:conveyance-write')
         ->name('conveyances.destroy');
 });
+
+Route::middleware(['auth', 'approved', 'admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/users', [\App\Http\Controllers\Admin\UserApprovalController::class, 'index'])
+            ->name('users.index');
+        Route::post('/users/{user}/approve', [\App\Http\Controllers\Admin\UserApprovalController::class, 'approve'])
+            ->name('users.approve');
+    });
