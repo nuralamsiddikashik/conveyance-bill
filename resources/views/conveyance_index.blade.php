@@ -3,100 +3,156 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Conveyance History</title>
+    <title>Conveyance History | Ashik Auto Solution</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #1e293b;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(226, 232, 240, 0.7);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .glass-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+        border-color: #3b82f6;
+      }
+      .status-badge {
+        padding: 4px 10px;
+        border-radius: 9999px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .amount-gradient {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    </style>
   </head>
-  <body class="bg-slate-100">
-    <div class="mx-auto max-w-5xl px-4 py-8">
-      <div class="mb-6 flex items-center justify-between gap-3">
+  <body class="antialiased">
+    <div class="mx-auto max-w-6xl px-4 py-12">
+      
+      <header class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">Conveyance History</h1>
-          <p class="mt-1 text-sm text-slate-500">A timeline of submitted conveyances — quick glance and actions.</p>
+          <nav class="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+            <span>Portal</span>
+            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            <span class="text-indigo-600">History</span>
+          </nav>
+          <h1 class="text-4xl font-extrabold tracking-tight text-slate-900">Billing Timeline</h1>
+          <p class="mt-2 text-slate-500">Track and manage your submitted conveyance vouchers.</p>
         </div>
-        <div class="flex items-center gap-3">
-          <div class="hidden sm:flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700">Total: <span class="ml-2 font-semibold text-slate-900">{{ $conveyances->count() }}</span></div>
-          <a href="{{ route('conveyances.create') }}" class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow hover:bg-indigo-700">+ New Entry</a>
 
+        <div class="flex items-center gap-3">
           @auth
-            <div class="flex items-center gap-2">
-              <span class="hidden sm:inline-block text-sm text-slate-700">{{ auth()->user()->name }}</span>
-              @if (auth()->user()->is_admin)
-                <a href="{{ route('admin.users.index') }}" class="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50">Admin</a>
-              @endif
-              <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="ml-1 inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50">Logout</button>
-              </form>
+            <div class="flex items-center gap-3 pr-4 border-r border-slate-200">
+                <div class="text-right hidden sm:block">
+                    <p class="text-sm font-bold text-slate-900 leading-none">{{ auth()->user()->name }}</p>
+                    <p class="text-[10px] text-slate-400 uppercase mt-1">{{ auth()->user()->is_admin ? 'Administrator' : 'Team Member' }}</p>
+                </div>
+                <div class="h-10 w-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-lg">
+                    {{ substr(auth()->user()->name, 0, 1) }}
+                </div>
             </div>
           @endauth
+
+          <a href="{{ route('conveyances.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-xl shadow-slate-200 hover:bg-black transition-all active:scale-95">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            New Entry
+          </a>
+        </div>
+      </header>
+
+      <div class="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-2xl border border-slate-200">
+            <p class="text-xs font-bold text-slate-400 uppercase">Total Records</p>
+            <p class="text-2xl font-black text-slate-900">{{ $conveyances->count() }}</p>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-200">
+            <p class="text-xs font-bold text-slate-400 uppercase">This Month</p>
+            <p class="text-2xl font-black text-indigo-600">৳ {{ number_format($conveyances->sum('total_amount'), 0) }}</p>
         </div>
       </div>
 
       @if (session('status'))
-        <div class="mb-4 rounded border border-green-500 bg-green-50 px-3 py-2 text-sm text-green-800">
+        <div class="mb-6 flex items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+          <svg class="h-5 w-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
           {{ session('status') }}
         </div>
       @endif
 
-      @if ($errors->any())
-        <div class="mb-4 rounded border border-red-500 bg-red-50 px-3 py-2 text-sm text-red-800">
-          <ul class="list-disc pl-4">
-            @foreach ($errors->all() as $error)
-              <li>{{ $error }}</li>
-            @endforeach
-          </ul>
-        </div>
-      @endif
-
       @if ($conveyances->isEmpty())
-        <div class="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-600">
-          No conveyance records yet. Create today&apos;s conveyance from the entry page.
+        <div class="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white py-20 text-center">
+          <div class="mb-4 rounded-full bg-slate-50 p-4">
+            <svg class="h-10 w-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">No records found</h3>
+          <p class="text-sm text-slate-500">You haven't submitted any conveyance bills yet.</p>
         </div>
       @else
-        <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           @foreach ($conveyances as $conveyance)
-            <article class="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-4 shadow-sm hover:shadow-md transition-shadow">
-              <div class="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-indigo-500 to-indigo-300"></div>
-              <div class="ml-3 flex items-start justify-between gap-4">
-                <div class="flex-1">
-                  <div class="flex items-center gap-3">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m2 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <div class="text-sm font-semibold text-slate-900">{{ $conveyance->date->format('d M, Y') }}</div>
-                      <div class="mt-1 text-xs text-slate-500">Submitted {{ $conveyance->created_at->diffForHumans() }}</div>
-                    </div>
-                  </div>
-                  <div class="mt-4 flex items-center justify-between gap-4">
-                    <div>
-                      <div class="text-xs text-slate-500">Total Amount</div>
-                      <div class="mt-1 text-lg font-semibold text-slate-900">৳ {{ number_format($conveyance->total_amount, 2) }}</div>
-                    </div>
-                    <div class="text-right">
-                      <div class="text-xs text-slate-500">Items</div>
-                      <div class="mt-1 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{{ $conveyance->items_count ?? $conveyance->items->count() }}</div>
-                    </div>
-                  </div>
-                  @if (auth()->user()->is_admin)
-                    <div class="mt-3 text-xs text-slate-500">
-                      Owner: <span class="font-semibold text-slate-700">{{ $conveyance->user?->name ?? 'Unknown' }}</span>
-                    </div>
-                  @endif
+            <article class="glass-card relative flex flex-col rounded-3xl p-6">
+              <div class="mb-4 flex items-center justify-between">
+                <div class="rounded-xl bg-indigo-50 p-2 text-indigo-600">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+                <span class="status-badge bg-slate-100 text-slate-600">{{ $conveyance->created_at->diffForHumans(null, true) }} ago</span>
+              </div>
+
+              <div class="mb-6">
+                <h2 class="text-xl font-extrabold text-slate-900">{{ $conveyance->date->format('D, d M Y') }}</h2>
+                @if (auth()->user()->is_admin)
+                  <p class="text-[11px] font-bold text-indigo-500 uppercase mt-1 tracking-wider">User: {{ $conveyance->user?->name ?? 'N/A' }}</p>
+                @endif
+              </div>
+
+              <div class="mt-auto flex items-end justify-between border-t border-slate-100 pt-6">
+                <div>
+                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Amount</p>
+                  <p class="amount-gradient text-2xl font-black">৳ {{ number_format($conveyance->total_amount, 0) }}</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Items</p>
+                  <p class="text-sm font-bold text-slate-700">{{ $conveyance->items_count ?? $conveyance->items->count() }} Entries</p>
                 </div>
               </div>
 
-              <div class="mt-4 flex flex-wrap items-center gap-2">
-                <a href="{{ route('conveyances.show', $conveyance) }}" class="inline-flex items-center gap-2 rounded-md border border-indigo-100 bg-white px-3 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50">View</a>
-                <a href="{{ route('conveyances.edit', $conveyance) }}" class="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">Edit</a>
-                <a href="{{ route('conveyances.show', $conveyance) }}" class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-1 text-xs font-medium text-white hover:bg-indigo-700">PDF</a>
+              <div class="mt-6 flex gap-2">
+                <a href="{{ route('conveyances.show', $conveyance) }}" class="flex-1 rounded-xl bg-slate-100 py-2.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-200 transition-colors">Details</a>
+                <a href="{{ route('conveyances.edit', $conveyance) }}" class="flex-1 rounded-xl bg-slate-100 py-2.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-200 transition-colors">Edit</a>
+                <a href="{{ route('conveyances.show', $conveyance) }}" class="rounded-xl bg-indigo-600 px-4 py-2.5 text-center text-xs font-bold text-white hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all">PDF</a>
               </div>
             </article>
           @endforeach
-        </section>
+        </div>
       @endif
+
+      @auth
+        @if (auth()->user()->is_admin)
+          <div class="mt-12 flex justify-center">
+            <a href="{{ route('admin.users.index') }}" class="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              Admin Control Panel
+            </a>
+          </div>
+        @endif
+        
+        <form method="POST" action="{{ route('logout') }}" class="mt-8 flex justify-center">
+            @csrf
+            <button type="submit" class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300 hover:text-red-500 transition-colors">Terminate Session / Logout</button>
+        </form>
+      @endauth
+
     </div>
   </body>
 </html>
