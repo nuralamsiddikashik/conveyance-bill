@@ -75,13 +75,84 @@
       <div class="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-white p-4 rounded-2xl border border-slate-200">
             <p class="text-xs font-bold text-slate-400 uppercase">Total Records</p>
-            <p class="text-2xl font-black text-slate-900">{{ $conveyances->count() }}</p>
+            <p class="text-2xl font-black text-slate-900">{{ $conveyances->total() }}</p>
         </div>
         <div class="bg-white p-4 rounded-2xl border border-slate-200">
-            <p class="text-xs font-bold text-slate-400 uppercase">This Month</p>
+            <p class="text-xs font-bold text-slate-400 uppercase">This Page</p>
             <p class="text-2xl font-black text-indigo-600">৳ {{ number_format($conveyances->sum('total_amount'), 0) }}</p>
         </div>
       </div>
+
+      <form method="GET" action="{{ route('conveyances.index') }}" class="mb-8 rounded-2xl border border-slate-200 bg-white p-4">
+        <div class="grid gap-4 md:grid-cols-5">
+          <div>
+            <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-slate-400">From Date</label>
+            <input
+              type="date"
+              name="date_from"
+              value="{{ request('date_from') }}"
+              class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-slate-400">To Date</label>
+            <input
+              type="date"
+              name="date_to"
+              value="{{ request('date_to') }}"
+              class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-slate-400">Min Amount</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              name="min_amount"
+              value="{{ request('min_amount') }}"
+              class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-slate-400">Max Amount</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              name="max_amount"
+              value="{{ request('max_amount') }}"
+              class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          @if (auth()->user()->is_admin)
+            <div>
+              <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-slate-400">User</label>
+              <input
+                type="text"
+                name="user"
+                value="{{ request('user') }}"
+                placeholder="Name or email"
+                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-indigo-500"
+              />
+            </div>
+          @endif
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <p class="text-xs font-semibold text-slate-400">
+            Showing {{ $conveyances->firstItem() ?? 0 }} to {{ $conveyances->lastItem() ?? 0 }} of {{ $conveyances->total() }} records
+          </p>
+          <div class="flex gap-2">
+            <a href="{{ route('conveyances.index') }}" class="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-50">Clear</a>
+            <button type="submit" class="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700">Filter</button>
+          </div>
+        </div>
+      </form>
 
       @if (session('status'))
         <div class="mb-6 flex items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
@@ -90,7 +161,17 @@
         </div>
       @endif
 
-      @if ($conveyances->isEmpty())
+      @if ($errors->any())
+        <div class="mb-6 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800">
+          <ul class="list-disc pl-5">
+            @foreach ($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
+
+      @if ($conveyances->count() === 0)
         <div class="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white py-20 text-center">
           <div class="mb-4 rounded-full bg-slate-50 p-4">
             <svg class="h-10 w-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -134,6 +215,10 @@
               </div>
             </article>
           @endforeach
+        </div>
+
+        <div class="mt-8">
+          {{ $conveyances->links() }}
         </div>
       @endif
 

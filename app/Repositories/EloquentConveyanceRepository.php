@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Conveyance;
 use App\Models\User;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class EloquentConveyanceRepository implements ConveyanceRepositoryInterface {
@@ -60,12 +61,39 @@ class EloquentConveyanceRepository implements ConveyanceRepositoryInterface {
         return $conveyance->fresh( 'items' );
     }
 
-    public function all( User $user ) {
-        return $this->queryForUser( $user )
+    public function paginate( User $user, array $filters = [], int $perPage = 10 ): LengthAwarePaginator {
+        $query = $this->queryForUser( $user )
             ->with( 'user' )
-            ->withCount( 'items' )
+            ->withCount( 'items' );
+
+        if ( ! empty( $filters['date_from'] ) ) {
+            $query->whereDate( 'date', '>=', $filters['date_from'] );
+        }
+
+        if ( ! empty( $filters['date_to'] ) ) {
+            $query->whereDate( 'date', '<=', $filters['date_to'] );
+        }
+
+        if ( isset( $filters['min_amount'] ) && $filters['min_amount'] !== '' ) {
+            $query->where( 'total_amount', '>=', $filters['min_amount'] );
+        }
+
+        if ( isset( $filters['max_amount'] ) && $filters['max_amount'] !== '' ) {
+            $query->where( 'total_amount', '<=', $filters['max_amount'] );
+        }
+
+        if ( $user->is_admin && ! empty( $filters['user'] ) ) {
+            $search = trim( (string) $filters['user'] );
+            $query->whereHas( 'user', function ( $userQuery ) use ( $search ) {
+                $userQuery->where( 'name', 'like', "%{$search}%" )
+                    ->orWhere( 'email', 'like', "%{$search}%" );
+            } );
+        }
+
+        return $query
             ->orderByDesc( 'date' )
-            ->get();
+            ->orderByDesc( 'created_at' )
+            ->paginate( $perPage );
     }
 
     public function findByDate( User $user, string $date ): ?Conveyance {

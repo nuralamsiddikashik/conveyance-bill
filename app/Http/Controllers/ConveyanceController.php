@@ -7,6 +7,7 @@ use App\Models\Conveyance;
 use App\Models\ConveyanceDeleteRequest;
 use App\Models\ConveyanceItem;
 use App\Repositories\ConveyanceRepositoryInterface;
+use Illuminate\Http\Request;
 
 class ConveyanceController extends Controller {
     private ConveyanceRepositoryInterface $repo;
@@ -20,8 +21,7 @@ class ConveyanceController extends Controller {
     public function create() {
         $today = now()->toDateString();
 
-        return view( 'conveyance', [
-            'mode'       => 'create',
+        return view( 'conveyances.create', [
             'conveyance' => null,
             'rows'       => [],
             'date'       => $today,
@@ -56,17 +56,9 @@ class ConveyanceController extends Controller {
         $this->ensureAuthorized( $conveyance );
         $conveyance->load( 'items' );
 
-        $rows = $conveyance->items->map( function ( ConveyanceItem $item ) {
-            return [
-                'from'    => $item->from_place,
-                'to'      => $item->to_place,
-                'amount'  => (float) $item->amount,
-                'remarks' => $item->remarks,
-            ];
-        } )->values()->all();
+        $rows = $this->rowsForConveyance( $conveyance );
 
-        return view( 'conveyance', [
-            'mode'       => 'edit',
+        return view( 'conveyances.edit', [
             'conveyance' => $conveyance,
             'rows'       => $rows,
             'date'       => $conveyance->date->format( 'Y-m-d' ),
@@ -98,11 +90,22 @@ class ConveyanceController extends Controller {
     /**
      * List conveyances grouped by date.
      */
-    public function index() {
-        $conveyances = $this->repo->all( auth()->user() );
+    public function index( Request $request ) {
+        $filters = $request->validate( [
+            'date_from'  => ['nullable', 'date'],
+            'date_to'    => ['nullable', 'date', 'after_or_equal:date_from'],
+            'min_amount' => ['nullable', 'numeric', 'min:0'],
+            'max_amount' => ['nullable', 'numeric', 'gte:min_amount'],
+            'user'       => ['nullable', 'string', 'max:255'],
+        ] );
 
-        return view( 'conveyance_index', [
+        $conveyances = $this->repo
+            ->paginate( $request->user(), $filters, 10 )
+            ->withQueryString();
+
+        return view( 'conveyances.index', [
             'conveyances' => $conveyances,
+            'filters'     => $filters,
         ] );
     }
 
@@ -112,20 +115,13 @@ class ConveyanceController extends Controller {
     public function showByDate( string $date ) {
         $conveyance = $this->repo->findByDate( auth()->user(), $date ) ?? abort( 404 );
 
-        $rows = $conveyance->items->map( function ( ConveyanceItem $item ) {
-            return [
-                'from'    => $item->from_place,
-                'to'      => $item->to_place,
-                'amount'  => (float) $item->amount,
-                'remarks' => $item->remarks,
-            ];
-        } )->values()->all();
+        $rows = $this->rowsForConveyance( $conveyance );
 
-        return view( 'conveyance', [
-            'mode'       => 'show',
+        return view( 'conveyances.show', [
             'conveyance' => $conveyance,
             'rows'       => $rows,
             'date'       => $conveyance->date->format( 'Y-m-d' ),
+            'amountWords' => $this->amountToWords( (float) $conveyance->total_amount ),
         ] );
     }
 
@@ -136,20 +132,13 @@ class ConveyanceController extends Controller {
         $this->ensureAuthorized( $conveyance );
         $conveyance->load( 'items' );
 
-        $rows = $conveyance->items->map( function ( ConveyanceItem $item ) {
-            return [
-                'from'    => $item->from_place,
-                'to'      => $item->to_place,
-                'amount'  => (float) $item->amount,
-                'remarks' => $item->remarks,
-            ];
-        } )->values()->all();
+        $rows = $this->rowsForConveyance( $conveyance );
 
-        return view( 'conveyance', [
-            'mode'       => 'show',
+        return view( 'conveyances.show', [
             'conveyance' => $conveyance,
             'rows'       => $rows,
             'date'       => $conveyance->date->format( 'Y-m-d' ),
+            'amountWords' => $this->amountToWords( (float) $conveyance->total_amount ),
         ] );
     }
 
@@ -205,5 +194,94 @@ class ConveyanceController extends Controller {
         }
 
         abort( 403 );
+    }
+
+    private function rowsForConveyance( Conveyance $conveyance ): array {
+        return $conveyance->items->map( function ( ConveyanceItem $item ) {
+            return [
+                'from'    => $item->from_place,
+                'to'      => $item->to_place,
+                'amount'  => (float) $item->amount,
+                'remarks' => $item->remarks,
+            ];
+        } )->values()->all();
+    }
+
+    private function amountToWords( float $amount ): string {
+        if ( $amount <= 0 ) {
+            return 'Zero';
+        }
+
+        $ones = [
+            '',
+            'One',
+            'Two',
+            'Three',
+            'Four',
+            'Five',
+            'Six',
+            'Seven',
+            'Eight',
+            'Nine',
+            'Ten',
+            'Eleven',
+            'Twelve',
+            'Thirteen',
+            'Fourteen',
+            'Fifteen',
+            'Sixteen',
+            'Seventeen',
+            'Eighteen',
+            'Nineteen',
+        ];
+
+        $tens = [
+            '',
+            '',
+            'Twenty',
+            'Thirty',
+            'Forty',
+            'Fifty',
+            'Sixty',
+            'Seventy',
+            'Eighty',
+            'Ninety',
+        ];
+
+        $convert = function ( int $number ) use ( &$convert, $ones, $tens ): string {
+            if ( $number < 20 ) {
+                return $ones[$number];
+            }
+
+            if ( $number < 100 ) {
+                return $tens[intdiv( $number, 10 )] . ( $number % 10 ? ' ' . $ones[$number % 10] : '' );
+            }
+
+            return $ones[intdiv( $number, 100 )] . ' Hundred' . ( $number % 100 ? ' ' . $convert( $number % 100 ) : '' );
+        };
+
+        $integerPart = (int) floor( $amount );
+        $words = '';
+
+        if ( $integerPart >= 10000000 ) {
+            $words .= $this->amountToWords( intdiv( $integerPart, 10000000 ) ) . ' Crore ';
+            $integerPart %= 10000000;
+        }
+
+        if ( $integerPart >= 100000 ) {
+            $words .= $this->amountToWords( intdiv( $integerPart, 100000 ) ) . ' Lakh ';
+            $integerPart %= 100000;
+        }
+
+        if ( $integerPart >= 1000 ) {
+            $words .= $convert( intdiv( $integerPart, 1000 ) ) . ' Thousand ';
+            $integerPart %= 1000;
+        }
+
+        if ( $integerPart > 0 ) {
+            $words .= $convert( $integerPart );
+        }
+
+        return trim( $words );
     }
 }

@@ -15,7 +15,7 @@ Route::get('/login/waiting', [AuthController::class, 'showLoginWaiting'])
     ->middleware('guest')
     ->name('login.waiting');
 
-Route::get('/login/waiting/status', [AuthController::class, 'loginWaitingStatus'])
+Route::post('/login/waiting/status', [AuthController::class, 'loginWaitingStatus'])
     ->middleware('guest')
     ->name('login.waiting.status');
 

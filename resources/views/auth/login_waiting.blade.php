@@ -28,8 +28,12 @@
         attempts += 1;
         try {
           const response = await fetch('{{ route('login.waiting.status') }}', {
-            method: 'GET',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': '{{ csrf_token() }}',
+              'X-Requested-With': 'XMLHttpRequest'
+            }
           });
           const data = await response.json();
 
