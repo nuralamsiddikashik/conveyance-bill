@@ -52,7 +52,7 @@
           <p class="mt-2 text-slate-500">Track and manage your submitted conveyance vouchers.</p>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3">
           @auth
             <div class="flex items-center gap-3 pr-4 border-r border-slate-200">
                 <div class="text-right hidden sm:block">
@@ -63,6 +63,21 @@
                     {{ substr(auth()->user()->name, 0, 1) }}
                 </div>
             </div>
+
+            @if (auth()->user()->is_admin)
+              <a href="{{ route('admin.users.index') }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all active:scale-95">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Admin
+              </a>
+            @endif
+
+            <form method="POST" action="{{ route('logout') }}" class="inline">
+              @csrf
+              <button type="submit" class="inline-flex items-center gap-2 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-600 hover:bg-rose-100 transition-all active:scale-95">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                Logout
+              </button>
+            </form>
           @endauth
 
           <a href="{{ route('conveyances.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-xl shadow-slate-200 hover:bg-black transition-all active:scale-95">
@@ -87,62 +102,27 @@
         <div class="grid gap-4 md:grid-cols-5">
           <div>
             <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-slate-400">From Date</label>
-            <input
-              type="date"
-              name="date_from"
-              value="{{ request('date_from') }}"
-              class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-indigo-500"
-            />
+            <input type="date" name="date_from" value="{{ request('date_from') }}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-indigo-500" />
           </div>
-
           <div>
             <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-slate-400">To Date</label>
-            <input
-              type="date"
-              name="date_to"
-              value="{{ request('date_to') }}"
-              class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-indigo-500"
-            />
+            <input type="date" name="date_to" value="{{ request('date_to') }}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-indigo-500" />
           </div>
-
           <div>
             <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-slate-400">Min Amount</label>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              name="min_amount"
-              value="{{ request('min_amount') }}"
-              class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-indigo-500"
-            />
+            <input type="number" min="0" step="0.01" name="min_amount" value="{{ request('min_amount') }}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-indigo-500" />
           </div>
-
           <div>
             <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-slate-400">Max Amount</label>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              name="max_amount"
-              value="{{ request('max_amount') }}"
-              class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-indigo-500"
-            />
+            <input type="number" min="0" step="0.01" name="max_amount" value="{{ request('max_amount') }}" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-indigo-500" />
           </div>
-
           @if (auth()->user()->is_admin)
             <div>
               <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-slate-400">User</label>
-              <input
-                type="text"
-                name="user"
-                value="{{ request('user') }}"
-                placeholder="Name or email"
-                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-indigo-500"
-              />
+              <input type="text" name="user" value="{{ request('user') }}" placeholder="Name or email" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 outline-none focus:border-indigo-500" />
             </div>
           @endif
         </div>
-
         <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
           <p class="text-xs font-semibold text-slate-400">
             Showing {{ $conveyances->firstItem() ?? 0 }} to {{ $conveyances->lastItem() ?? 0 }} of {{ $conveyances->total() }} records
@@ -158,16 +138,6 @@
         <div class="mb-6 flex items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
           <svg class="h-5 w-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
           {{ session('status') }}
-        </div>
-      @endif
-
-      @if ($errors->any())
-        <div class="mb-6 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800">
-          <ul class="list-disc pl-5">
-            @foreach ($errors->all() as $error)
-              <li>{{ $error }}</li>
-            @endforeach
-          </ul>
         </div>
       @endif
 
@@ -189,14 +159,12 @@
                 </div>
                 <span class="status-badge bg-slate-100 text-slate-600">{{ $conveyance->created_at->diffForHumans(null, true) }} ago</span>
               </div>
-
               <div class="mb-6">
                 <h2 class="text-xl font-extrabold text-slate-900">{{ $conveyance->date->format('D, d M Y') }}</h2>
                 @if (auth()->user()->is_admin)
                   <p class="text-[11px] font-bold text-indigo-500 uppercase mt-1 tracking-wider">User: {{ $conveyance->user?->name ?? 'N/A' }}</p>
                 @endif
               </div>
-
               <div class="mt-auto flex items-end justify-between border-t border-slate-100 pt-6">
                 <div>
                   <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Amount</p>
@@ -207,7 +175,6 @@
                   <p class="text-sm font-bold text-slate-700">{{ $conveyance->items_count ?? $conveyance->items->count() }} Entries</p>
                 </div>
               </div>
-
               <div class="mt-6 flex gap-2">
                 <a href="{{ route('conveyances.show', $conveyance) }}" class="flex-1 rounded-xl bg-slate-100 py-2.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-200 transition-colors">Details</a>
                 <a href="{{ route('conveyances.edit', $conveyance) }}" class="flex-1 rounded-xl bg-slate-100 py-2.5 text-center text-xs font-bold text-slate-700 hover:bg-slate-200 transition-colors">Edit</a>
@@ -216,27 +183,10 @@
             </article>
           @endforeach
         </div>
-
         <div class="mt-8">
           {{ $conveyances->links() }}
         </div>
       @endif
-
-      @auth
-        @if (auth()->user()->is_admin)
-          <div class="mt-12 flex justify-center">
-            <a href="{{ route('admin.users.index') }}" class="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors">
-              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-              Admin Control Panel
-            </a>
-          </div>
-        @endif
-        
-        <form method="POST" action="{{ route('logout') }}" class="mt-8 flex justify-center">
-            @csrf
-            <button type="submit" class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300 hover:text-red-500 transition-colors">Terminate Session / Logout</button>
-        </form>
-      @endauth
 
     </div>
   </body>
