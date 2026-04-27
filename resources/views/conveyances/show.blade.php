@@ -365,10 +365,6 @@
           </div>
           <div class="sig-item">
             <div class="sig-line"></div>
-            <div class="sig-label">Store Keeper</div>
-          </div>
-          <div class="sig-item">
-            <div class="sig-line"></div>
             <div class="sig-label">Received By</div>
           </div>
         </div>

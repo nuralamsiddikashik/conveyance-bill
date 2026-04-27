@@ -15,6 +15,7 @@ class ConveyanceController extends Controller {
     public function __construct( ConveyanceRepositoryInterface $repo ) {
         $this->repo = $repo;
     }
+
     /**
      * Show a fresh form for creating a conveyance.
      */
@@ -118,9 +119,9 @@ class ConveyanceController extends Controller {
         $rows = $this->rowsForConveyance( $conveyance );
 
         return view( 'conveyances.show', [
-            'conveyance' => $conveyance,
-            'rows'       => $rows,
-            'date'       => $conveyance->date->format( 'Y-m-d' ),
+            'conveyance'  => $conveyance,
+            'rows'        => $rows,
+            'date'        => $conveyance->date->format( 'Y-m-d' ),
             'amountWords' => $this->amountToWords( (float) $conveyance->total_amount ),
         ] );
     }
@@ -135,9 +136,9 @@ class ConveyanceController extends Controller {
         $rows = $this->rowsForConveyance( $conveyance );
 
         return view( 'conveyances.show', [
-            'conveyance' => $conveyance,
-            'rows'       => $rows,
-            'date'       => $conveyance->date->format( 'Y-m-d' ),
+            'conveyance'  => $conveyance,
+            'rows'        => $rows,
+            'date'        => $conveyance->date->format( 'Y-m-d' ),
             'amountWords' => $this->amountToWords( (float) $conveyance->total_amount ),
         ] );
     }
@@ -167,14 +168,14 @@ class ConveyanceController extends Controller {
         }
 
         ConveyanceDeleteRequest::create( [
-            'conveyance_id' => $conveyance->id,
-            'requested_by' => $user?->id,
-            'status' => 'pending',
-            'conveyance_date' => $conveyance->date,
+            'conveyance_id'           => $conveyance->id,
+            'requested_by'            => $user?->id,
+            'status'                  => 'pending',
+            'conveyance_date'         => $conveyance->date,
             'conveyance_total_amount' => $conveyance->total_amount,
-            'conveyance_owner_id' => $conveyance->user_id,
-            'request_ip' => request()->ip(),
-            'request_user_agent' => request()->userAgent(),
+            'conveyance_owner_id'     => $conveyance->user_id,
+            'request_ip'              => request()->ip(),
+            'request_user_agent'      => request()->userAgent(),
         ] );
 
         return redirect()
@@ -185,7 +186,7 @@ class ConveyanceController extends Controller {
     private function ensureAuthorized( Conveyance $conveyance ): void {
         $user = auth()->user();
 
-        if ( ! $user ) {
+        if ( !$user ) {
             abort( 403 );
         }
 
@@ -261,7 +262,7 @@ class ConveyanceController extends Controller {
         };
 
         $integerPart = (int) floor( $amount );
-        $words = '';
+        $words       = '';
 
         if ( $integerPart >= 10000000 ) {
             $words .= $this->amountToWords( intdiv( $integerPart, 10000000 ) ) . ' Crore ';
