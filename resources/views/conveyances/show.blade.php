@@ -8,13 +8,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Conveyance Bill - Conveyance Bill</title>
+    <title>Conveyance Bill</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&family=Source+Sans+3:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       *,
       *::before,
@@ -30,22 +29,6 @@
         min-height: 100vh;
         padding: 16px 10px 60px;
         color: #1a1a1a;
-      }
-
-      .btn-pdf {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        width: 100%;
-        background: #1a1a2e;
-        color: #fff;
-        font-size: 15px;
-        font-weight: 600;
-        padding: 14px 32px;
-        border-radius: 4px;
-        cursor: pointer;
-        box-shadow: 0 2px 8px rgba(26, 26, 46, 0.3);
       }
 
       #pdf-area {
@@ -90,22 +73,8 @@
         font-weight: 700;
       }
 
-      .preview-table tfoot td {
-        padding: 10px 12px;
-      }
-
-      .tl {
-        text-align: left;
-      }
-
-      .tr {
-        text-align: right;
-      }
-
-      #prev-total-cell {
-        text-align: right;
-        font-weight: 800;
-      }
+      .tl { text-align: left; }
+      .tr { text-align: right; }
 
       .sig-row {
         display: flex;
@@ -133,6 +102,7 @@
         letter-spacing: 0.6px;
       }
 
+      /* PDF compact mode */
       .pdf-compact #pdf-area {
         padding: 5px 15px !important;
       }
@@ -145,11 +115,6 @@
 
       .pdf-compact .sig-row {
         margin-top: 25px !important;
-      }
-
-      .pdf-compact .sig-label,
-      .pdf-compact #prev-words {
-        font-size: 11px !important;
       }
 
       .pdf-compact hr {
@@ -167,8 +132,7 @@
       }
 
       @media print {
-        html,
-        body {
+        html, body {
           background: #fff !important;
           margin: 2mm !important;
           color: #111 !important;
@@ -216,17 +180,19 @@
     </style>
   </head>
   <body>
-    <div style="max-width: 900px; margin: 0 auto">
-      <div class="no-print" style="max-width: 900px; margin: 0 auto 12px">
+    <div style="max-width: 900px; margin: 0 auto;">
+
+      {{-- FLASH MESSAGES --}}
+      <div class="no-print" style="margin-bottom: 12px;">
         @if (session('status'))
-          <div class="mb-3 rounded border border-green-500 bg-green-50 px-3 py-2 text-sm text-green-800">
+          <div style="margin-bottom: 10px; border-radius: 4px; border: 1px solid #22c55e; background: #f0fdf4; padding: 8px 12px; font-size: 14px; color: #166534;">
             {{ session('status') }}
           </div>
         @endif
 
         @if ($errors->any())
-          <div class="mb-3 rounded border border-red-500 bg-red-50 px-3 py-2 text-sm text-red-800">
-            <ul class="list-disc pl-4">
+          <div style="margin-bottom: 10px; border-radius: 4px; border: 1px solid #ef4444; background: #fef2f2; padding: 8px 12px; font-size: 14px; color: #991b1b;">
+            <ul style="padding-left: 16px; list-style: disc;">
               @foreach ($errors->all() as $error)
                 <li>{{ $error }}</li>
               @endforeach
@@ -235,19 +201,20 @@
         @endif
       </div>
 
-      <div class="no-print mb-3 flex max-w-[900px] items-center justify-between gap-3">
-        <a
-          href="{{ route('conveyances.index') }}"
-          class="text-xs font-semibold uppercase tracking-wide text-blue-700 underline"
+      {{-- TOP NAV BUTTONS --}}
+      <div class="no-print" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px;">
+        
+          <a href="{{ route('conveyances.index') }}"
+          style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #1d4ed8; text-decoration: underline;"
         >
-          Back to History
+          ← Back to History
         </a>
 
         @if(isset($conveyance))
-          <div class="flex items-center gap-2">
-            <a
-              href="{{ route('conveyances.edit', $conveyance) }}"
-              class="rounded border border-slate-300 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-700 hover:bg-slate-50"
+          <div style="display: flex; align-items: center; gap: 8px;">
+            
+              <a href="{{ route('conveyances.edit', $conveyance) }}"
+              style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 12px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #334155; text-decoration: none; background: #fff;"
             >
               Edit
             </a>
@@ -255,12 +222,13 @@
               method="POST"
               action="{{ route('conveyances.destroy', $conveyance) }}"
               onsubmit="return confirm('{{ auth()->user() && auth()->user()->is_admin ? 'Are you sure you want to delete this conveyance?' : 'Send deletion request to admin?' }}');"
+              style="margin: 0;"
             >
               @csrf
               @method('DELETE')
               <button
                 type="submit"
-                class="rounded border border-red-500 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-red-600 hover:bg-red-50"
+                style="border: 1px solid #ef4444; border-radius: 4px; padding: 4px 12px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #dc2626; background: transparent; cursor: pointer;"
               >
                 {{ auth()->user() && auth()->user()->is_admin ? 'Delete This Conveyance' : 'Request Deletion' }}
               </button>
@@ -269,91 +237,78 @@
         @endif
       </div>
 
+      {{-- PDF AREA --}}
       <div id="pdf-area">
-        <div id="header-container" style="margin-bottom: 6px">
-          <div
-            style="
-              font-family: &quot;Merriweather&quot;, serif;
-              font-size: 22px;
-              font-weight: 900;
-              color: #1a1a2e;
-              line-height: 1.2;
-            "
-          >
-            ASHIS AUTO SOLUTION
+
+        {{-- HEADER --}}
+        <div id="header-container" style="margin-bottom: 6px; display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <div style="font-family: 'Merriweather', serif; font-size: 22px; font-weight: 900; color: #1a1a2e; line-height: 1.2;">
+              ASHIS AUTO SOLUTION
+            </div>
+            <div style="font-size: 12px; color: #444; margin-top: 4px; line-height: 1.4;">
+              Address: Madani Avenue, Beraid, Badda, Dhaka 1212.<br />
+              Phone: 01712287659, 01678-094899
+            </div>
           </div>
-          <div style="font-size: 12px; color: #444; margin-top: 4px; line-height: 1.4">
-            Address: Madani Avenue, Beraid, Badda, Dhaka 1212.<br />
-            Phone: 01712287659, 01678-094899
+          <div style="text-align: right;">
+            <div style="font-family: 'Merriweather', serif; font-size: 16px; font-weight: 900; text-decoration: underline; color: #1a1a2e;">
+              CONVEYANCE BILL
+            </div>
+            <div style="font-size: 13px; margin-top: 6px;">
+              Date: <strong>
+                @if (!empty($date))
+                  {{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}
+                @else
+                  —
+                @endif
+              </strong>
+            </div>
           </div>
         </div>
 
-        <hr style="border: none; border-top: 2.5px solid #1a1a2e; margin: 10px 0" />
+        <hr style="border: none; border-top: 2.5px solid #1a1a2e; margin: 10px 0;" />
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px">
-          <div style="font-size: 13px">
-            Date:
-            <strong>
-              @if (!empty($date))
-                {{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}
-              @else
-                —
-              @endif
-            </strong>
-          </div>
-          <div
-            style="
-              font-family: &quot;Merriweather&quot;, serif;
-              font-size: 16px;
-              font-weight: 900;
-              text-decoration: underline;
-            "
-          >
-            CONVEYANCE BILL
-          </div>
-          <div style="width: 50px"></div>
-        </div>
-
-        <div class="preview-table-wrap">
-          <table class="preview-table">
-            <thead>
+        {{-- TABLE --}}
+        <table class="preview-table">
+          <thead>
+            <tr>
+              <th style="width: 40px;">SL</th>
+              <th>From</th>
+              <th>To</th>
+              <th style="width: 110px;">Amount (৳)</th>
+              <th>Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            @forelse ($billRows as $row)
               <tr>
-                <th style="width: 40px">SL</th>
-                <th>From</th>
-                <th>To</th>
-                <th style="width: 110px">Amount (৳)</th>
-                <th>Remarks</th>
+                <td style="text-align: center;">{{ $loop->iteration }}</td>
+                <td class="tl">{{ $row['from'] ?? '' }}</td>
+                <td class="tl">{{ $row['to'] ?? '' }}</td>
+                <td class="tr">{{ number_format((float) ($row['amount'] ?? 0), 2) }}</td>
+                <td class="tl">{{ $row['remarks'] ?? '' }}</td>
               </tr>
-            </thead>
-            <tbody>
-              @forelse ($billRows as $row)
-                <tr>
-                  <td>{{ $loop->iteration }}</td>
-                  <td class="tl">{{ $row['from'] ?? '' }}</td>
-                  <td class="tl">{{ $row['to'] ?? '' }}</td>
-                  <td class="tr">{{ number_format((float) ($row['amount'] ?? 0), 2) }}</td>
-                  <td class="tl">{{ $row['remarks'] ?? '' }}</td>
-                </tr>
-              @empty
-                <tr>
-                  <td colspan="5" class="tl">No conveyance rows found.</td>
-                </tr>
-              @endforelse
-            </tbody>
-            <tfoot>
+            @empty
               <tr>
-                <td colspan="3" style="text-align: right; border: 1px solid #666">Total</td>
-                <td class="tr" id="prev-total-cell" style="border: 1px solid #666">৳ {{ number_format($billTotal, 2) }}</td>
-                <td style="border: 1px solid #666"></td>
+                <td colspan="5" class="tl">No conveyance rows found.</td>
               </tr>
-            </tfoot>
-          </table>
-        </div>
+            @endforelse
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" style="border: 1px solid #666; padding: 10px 12px; font-size: 12px; font-weight: 600; background: #f3f4f7;">
+                Amount In Words: <span style="font-weight: 700;">{{ $amountWords ?? 'Zero' }} Taka Only</span>
+              </td>
+              <td style="border: 1px solid #666; padding: 10px 12px; text-align: right; font-size: 13px; font-weight: 800; white-space: nowrap; background: #f3f4f7;">
+                ৳ {{ number_format($billTotal, 2) }}
+              </td>
+              <td style="border: 1px solid #666; background: #f3f4f7;"></td>
+            </tr>
+          </tfoot>
+        </table>
 
-        <div style="font-size: 13px; font-weight: 700; margin-top: 15px" id="prev-words">
-          Amount In Words: {{ $amountWords ?? 'Zero' }} Taka Only
-        </div>
-
+        {{-- SIGNATURES --}}
         <div class="sig-row">
           <div class="sig-item">
             <div class="sig-line"></div>
@@ -368,16 +323,28 @@
             <div class="sig-label">Received By</div>
           </div>
         </div>
+
+      </div>
+      {{-- END PDF AREA --}}
+
+      {{-- BOTTOM BUTTONS --}}
+      <div class="no-print" style="margin-top: 20px; display: flex; gap: 8px;">
+        <button
+          id="printBtn"
+          onclick="printThis()"
+          style="border: 1px solid #cbd5e1; background: #fff; border-radius: 4px; padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer;"
+        >
+          Print
+        </button>
+        <button
+          id="dlBtn"
+          onclick="downloadPDF()"
+          style="flex: 1; background: #1a1a2e; color: #fff; border: none; border-radius: 4px; padding: 10px 32px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(26,26,46,0.3);"
+        >
+          Download PDF
+        </button>
       </div>
 
-      <div style="margin-top: 20px" class="no-print">
-        <div style="display:flex; gap:8px;">
-          <button id="printBtn" class="rounded border border-slate-300 bg-white px-3 py-2 text-sm font-semibold" onclick="printThis()">Print</button>
-          <button class="btn-pdf" onclick="downloadPDF()" id="dlBtn">
-            Download PDF
-          </button>
-        </div>
-      </div>
     </div>
 
     <script>
