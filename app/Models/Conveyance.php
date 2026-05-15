@@ -12,6 +12,7 @@ class Conveyance extends Model {
         'user_id',
         'date',
         'total_amount',
+        'note',
     ];
 
     protected $casts = [

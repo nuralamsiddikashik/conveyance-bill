@@ -7,9 +7,9 @@ use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface ConveyanceRepositoryInterface {
-    public function createForDate( User $user, string $date, array $rows ): Conveyance;
+    public function createForDate( User $user, string $date, array $rows, ?string $note = null ): Conveyance;
 
-    public function update( Conveyance $conveyance, string $date, array $rows ): Conveyance;
+    public function update( Conveyance $conveyance, string $date, array $rows, ?string $note = null ): Conveyance;
 
     public function paginate( User $user, array $filters = [], int $perPage = 10 ): LengthAwarePaginator;
 

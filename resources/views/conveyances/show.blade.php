@@ -308,6 +308,15 @@
           </tfoot>
         </table>
 
+        @if (!empty($note))
+          <div style="margin-top: 14px; border: 1px solid #d4d9e2; border-radius: 6px; background: #f8fafc; padding: 12px 14px;">
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 6px;">
+              Note
+            </div>
+            <div style="font-size: 13px; line-height: 1.6; color: #1e293b; white-space: pre-wrap;">{{ $note }}</div>
+          </div>
+        @endif
+
         {{-- SIGNATURES --}}
         <div class="sig-row">
           <div class="sig-item">

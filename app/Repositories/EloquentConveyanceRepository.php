@@ -8,17 +8,18 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class EloquentConveyanceRepository implements ConveyanceRepositoryInterface {
-    public function createForDate( User $user, string $date, array $rows ): Conveyance {
+    public function createForDate( User $user, string $date, array $rows, ?string $note = null ): Conveyance {
         $total = 0;
         foreach ( $rows as $row ) {
             $total += (float) ( $row['amount'] ?? 0 );
         }
 
-        DB::transaction( function () use ( $user, $date, $rows, $total, &$conveyance ) {
+        DB::transaction( function () use ( $user, $date, $rows, $total, $note, &$conveyance ) {
             $conveyance = Conveyance::create( [
                 'user_id'      => $user->id,
                 'date'         => $date,
                 'total_amount' => $total,
+                'note'         => $note,
             ] );
 
             foreach ( $rows as $row ) {
@@ -34,16 +35,17 @@ class EloquentConveyanceRepository implements ConveyanceRepositoryInterface {
         return $conveyance;
     }
 
-    public function update( Conveyance $conveyance, string $date, array $rows ): Conveyance {
+    public function update( Conveyance $conveyance, string $date, array $rows, ?string $note = null ): Conveyance {
         $total = 0;
         foreach ( $rows as $row ) {
             $total += (float) ( $row['amount'] ?? 0 );
         }
 
-        DB::transaction( function () use ( $conveyance, $date, $rows, $total ) {
+        DB::transaction( function () use ( $conveyance, $date, $rows, $total, $note ) {
             $conveyance->update( [
                 'date'         => $date,
                 'total_amount' => $total,
+                'note'         => $note,
             ] );
 
             $conveyance->items()->delete();

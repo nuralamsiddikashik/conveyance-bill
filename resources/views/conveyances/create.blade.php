@@ -291,6 +291,29 @@
         letter-spacing: 0.3px;
       }
 
+      .note-input {
+        width: 100%;
+        min-height: 88px;
+        margin-top: 14px;
+        border: 1.5px solid var(--border-strong);
+        border-radius: 8px;
+        padding: 11px 13px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--text);
+        background: var(--surface-off);
+        resize: vertical;
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+      }
+
+      .note-input:focus {
+        border-color: var(--navy-light);
+        box-shadow: 0 0 0 3px rgba(15, 28, 46, 0.07);
+        background: #fff;
+      }
+
       /* ── Footer actions ── */
       .form-actions { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 10px; }
 
@@ -408,6 +431,12 @@
             <span class="tlabel">Total Amount</span>
             <span class="tvalue" id="formTotal">৳ 0.00</span>
           </div>
+
+          <textarea
+            name="note"
+            class="note-input"
+            placeholder="Add note"
+          >{{ old('note') }}</textarea>
 
           <input type="hidden" name="rows" id="rowsInput" />
 

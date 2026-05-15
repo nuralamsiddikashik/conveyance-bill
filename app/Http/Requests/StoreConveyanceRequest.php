@@ -25,7 +25,14 @@ class StoreConveyanceRequest extends FormRequest {
         return [
             'date' => ['required', 'date'],
             'rows' => ['required', 'string', 'json', 'max:20000'],
+            'note' => ['nullable', 'string', 'max:5000'],
         ];
+    }
+
+    public function conveyanceNote(): ?string {
+        $note = trim( (string) $this->validated( 'note', '' ) );
+
+        return $note === '' ? null : $note;
     }
 
     /**

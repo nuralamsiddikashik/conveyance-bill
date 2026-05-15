@@ -43,7 +43,7 @@ class ConveyanceController extends Controller {
                 ->withErrors( ['rows' => 'Please add at least one conveyance row.'] );
         }
 
-        $this->repo->createForDate( $request->user(), $validated['date'], $rows );
+        $this->repo->createForDate( $request->user(), $validated['date'], $rows, $request->conveyanceNote() );
 
         return redirect()
             ->route( 'conveyances.create' )
@@ -63,6 +63,7 @@ class ConveyanceController extends Controller {
             'conveyance' => $conveyance,
             'rows'       => $rows,
             'date'       => $conveyance->date->format( 'Y-m-d' ),
+            'note'       => $conveyance->note,
         ] );
     }
 
@@ -81,7 +82,7 @@ class ConveyanceController extends Controller {
                 ->withErrors( ['rows' => 'Please add at least one conveyance row.'] );
         }
 
-        $this->repo->update( $conveyance, $validated['date'], $rows );
+        $this->repo->update( $conveyance, $validated['date'], $rows, $request->conveyanceNote() );
 
         return redirect()
             ->route( 'conveyances.show', $conveyance )
@@ -123,6 +124,7 @@ class ConveyanceController extends Controller {
             'rows'        => $rows,
             'date'        => $conveyance->date->format( 'Y-m-d' ),
             'amountWords' => $this->amountToWords( (float) $conveyance->total_amount ),
+            'note'        => $conveyance->note,
         ] );
     }
 
@@ -140,6 +142,7 @@ class ConveyanceController extends Controller {
             'rows'        => $rows,
             'date'        => $conveyance->date->format( 'Y-m-d' ),
             'amountWords' => $this->amountToWords( (float) $conveyance->total_amount ),
+            'note'        => $conveyance->note,
         ] );
     }
 
